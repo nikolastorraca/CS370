@@ -10,19 +10,13 @@
 
 int main(int argc, char *argv[]) {
 
-    printf("Wow! This program compiles. Amazing!\n"); //DEBUG
-    
     if(argc != 2)
     {
         printf("Incorrect Usage. Please run with 1 argument.\n");
         return 0;
     }
     
-    printf("(DEBUG) You entered: %s\n", argv[1]); //DEBUG
-
     int seed = atoi(argv[1]);
-
-    printf("(DEBUG) Seed: %d\n", seed); //DEBUG
 
     srand(seed);
     printf("[Starter]: With seed: %d\n", seed);    
