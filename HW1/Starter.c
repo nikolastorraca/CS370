@@ -10,6 +10,7 @@
 
 int main(int argc, char *argv[]) {
 
+    //verify correct number of arguments given by user
     if(argc != 2)
     {
         printf("Incorrect Usage. Please run with 1 argument.\n");
@@ -18,6 +19,7 @@ int main(int argc, char *argv[]) {
     
     int seed = atoi(argv[1]);
 
+    //set seed based on user input, and print to user
     srand(seed);
     printf("[Starter]: With seed: %d\n", seed);    
 

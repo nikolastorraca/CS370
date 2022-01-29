@@ -16,17 +16,21 @@ float get_running_ratio()
     float ratioSum = 0;
     int arraySize;
 
-    int totalIterations = random_in_range(50, 99);
+    //calculate number of iterations between 50 (inclusive) and 100 (exclusive)
+    int totalIterations = random_in_range(50, 100);
     printf("[Executor]: Number of iterations is: %d\n", totalIterations);
 
-    for(int i = 0; i < totalIterations; i++)
+    for(int i = 1; i <= totalIterations; i++)
     {
-        arraySize = random_in_range(100, 144);
+        arraySize = random_in_range(100, 150);
 
+        //Allocate array on heap
         int *array = malloc(arraySize * sizeof(int));
+        
+        //populate array with random numbers between 50 (inclusive) and 199 (inclusive)
         for(int i = 0; i < arraySize; i++)
         {
-            array[i] = random_in_range(50, 199);
+            array[i] = random_in_range(50, 200);
         }
           
         int newPrimeCount = get_prime_count(array, arraySize);
@@ -41,11 +45,12 @@ float get_running_ratio()
 
         ratioSum += ratio;
 
+        //free memory on heap
         free(array);
     }
 
     printf("[Executor]: Iteration with maximum prime count is %d\n", maxCountIteration);
-    return (ratioSum/arraySize);
+    return (ratioSum/totalIterations);
 }
 
 int random_in_range(int lower_bound, int upper_bound)
@@ -57,10 +62,11 @@ int get_prime_count(int *array, int arraySize)
 {
         
     int primeTotal = 0;
-    //Iterating each number 
+
+    //Iterating though each number in array
     for(int i = 0; i < arraySize; i++){
         
-        int number = array[i]; //initialzie number 
+        int number = array[i];
         int j = 2;
         int flag = 1;
 
@@ -72,10 +78,11 @@ int get_prime_count(int *array, int arraySize)
             }   
             j++;
         }
+
+        //if flag is 1, the number is prime. Increment primeTotal
         if(flag == 1) {
             primeTotal++;
         }
-        
     }  
         
     return primeTotal;
