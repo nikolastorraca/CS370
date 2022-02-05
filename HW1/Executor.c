@@ -43,6 +43,8 @@ float get_running_ratio()
         int difference = arraySize-newPrimeCount;
         float ratio = ((float)newPrimeCount/(float)difference);
 
+        printf("Ratio: %.6f\n", ratio);
+
         ratioSum += ratio;
 
         //free memory on heap
@@ -63,7 +65,7 @@ int get_prime_count(int *array, int arraySize)
         
     int primeTotal = 0;
 
-    //Iterating though each number in array
+    //Iterating through each number in array
     for(int i = 0; i < arraySize; i++){
         
         int number = array[i];
