@@ -14,38 +14,37 @@
 
 int main(int argc, char** argv) {
     pid_t my_pid = getpid();
-    printf("[Generator %d] Preparing to fork...\n", my_pid);
+    int lucasReturnVal = 0;
+    int hexReturnVal = 0;
+    int harmonicReturnVal = 0;
+    char returnValString[10];
 
     if(argc!=2) {
         printf("Expecting 1 arguments. Try again.\n");
         return 0;
     }
 
-    printf("[Generator %d]: Preparing to open file:\n", my_pid);
     FILE *fp=fopen(argv[1],"r");
-
     char buff[BUFF_SIZE]; // Buffer to hold data from file
 
     while(fgets(buff, BUFF_SIZE-1, fp) != NULL){
 
-        printf("Input: %s", buff);
         pid_t pid = fork();
         if(pid < 0) {
             printf("Fork Failed\n");
             exit(1);
         }
         else if(pid == 0) { // Child Process
-            printf("[Generator %d]: about to execlp...\n\n", getpid());
-            execlp("./Lucas", "./Child", buff, NULL);
+            execlp("./Lucas", "./Lucas", buff, NULL);
         }
         else { // Parent Process
             
             printf("[Generator %d]: Waiting for the child process %d.\n", my_pid, pid);
             int status;
             pid = wait(&status);
-            printf("[Generator %d]: Done waiting for process %d.\n", my_pid, pid);
             if(WIFEXITED(status)){
                 printf("[Generator %d]: Child process %d returned %d.\n", my_pid, pid, WEXITSTATUS(status));
+                lucasReturnVal = WEXITSTATUS(status);
             }
             else {
                 printf("Child did not terminate.\n\n");
@@ -53,35 +52,65 @@ int main(int argc, char** argv) {
             }
         }
 
-    }
-    printf("\n");
+        sprintf(returnValString, "%d", lucasReturnVal);
+        pid_t pid2 = fork();
 
-/*
-    pid_t pid = fork();
-
-    if(pid < 0) {
-        printf("Fork Failed\n");
-        exit(1);
-    }
-    else if(pid == 0) { // Child Process
-        printf("[Child %d] about to execlp...\n\n", getpid());
-        execlp("./Child", "./Child", "1", NULL);
-    }
-    else { //Parent Process
-        printf("[Generator %d]: Forked process with ID %d.\n", my_pid, pid);
-        printf("[Generator %d]: Waiting for Process %d.\n", my_pid, pid);
-        int status;
-        pid = wait(&status);
-        printf("\n[Generator %d]: Done waiting for Process %d.\n", my_pid, pid);
-        if(WIFEXITED(status)){
-            printf("[Generator %d]: Child process %d returned %d.\n", my_pid, pid, WEXITSTATUS(status));
-        }
-        else {
-            printf("Child did not terminate\n");
+        if(pid2 < 0) {
+            printf("Fork Failed\n");
             exit(1);
         }
+        else if(pid2 == 0) { // Child Process
+            execlp("./HexagonalSeries", "./HexagonalSeries", returnValString, NULL);
+        }
+        else { // Parent Process
+            
+            printf("[Generator %d]: Waiting for the child process %d.\n", my_pid, pid2);
+            int status;
+            pid2 = wait(&status);
+            if(WIFEXITED(status)){
+                printf("[Generator %d]: Child process %d returned %d.\n", my_pid, pid2, WEXITSTATUS(status));
+                hexReturnVal = WEXITSTATUS(status);
+            }
+            else {
+                printf("Child did not terminate.\n\n");
+                exit(1);
+            }
+        }
+
+        sprintf(returnValString, "%d", hexReturnVal);
+        pid_t pid3 = fork();
+
+        if(pid3 < 0) {
+            printf("Fork Failed\n");
+            exit(1);
+        }
+        else if(pid3 == 0) { // Child Process
+            execlp("./HarmonicSeries", "./HarmonicSeries", returnValString, NULL);
+        }
+        else { // Parent Process
+            
+            printf("[Generator %d]: Waiting for the child process %d.\n", my_pid, pid3);
+            int status;
+            pid3 = wait(&status);
+            if(WIFEXITED(status)){
+                printf("[Generator %d]: Child process %d returned %d.\n", my_pid, pid3, WEXITSTATUS(status));
+                harmonicReturnVal = WEXITSTATUS(status);
+            }
+            else {
+                printf("Child did not terminate.\n\n");
+                exit(1);
+            }
+        }
+
+        //Summary
+        printf("[Generator %d]: The lucas child process returned %d\n", my_pid, lucasReturnVal);
+        printf("[Generator %d]: The Hexagonal child process is %d\n", my_pid, hexReturnVal);
+        printf("[Generator %d]: The sum of the first n Harmonic numbers is %d\n", my_pid, harmonicReturnVal);
+
     }
-*/
+
+    printf("\n");
+
   fclose(fp);
   return 0;
 }

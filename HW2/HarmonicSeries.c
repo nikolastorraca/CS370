@@ -24,17 +24,16 @@ int main(int argc, char** argv) {
     }
     float harmonicNums[] = {1,((float)1/(float)2),((float)1/(float)3),((float)1/(float)4),((float)1/(float)5),((float)1/(float)6),((float)1/(float)7),((float)1/(float)8),((float)1/(float)9),((float)1/(float)10),
         ((float)1/(float)11),((float)1/(float)12),((float)1/(float)13),((float)1/(float)14),((float)1/(float)15),((float)1/(float)16),((float)1/(float)17),((float)1/(float)18),((float)1/(float)19),((float)1/(float)20)};
-    printf("[HarmonicSeries %d] received argument: %d\n", pid, number);
 
     for(int i = 0; i <= number-1; i++){
         sum += harmonicNums[i];
     }
 
-    printf("[HarmonicSeries %d]: The sum of the first %d number of the Harmonic series is %.6f\n", pid, number, sum);
+    printf("[HarmonicSeries %d]: The sum of the first %d numbers of the Harmonic series is %.6f\n", pid, number, sum);
     printf("[HarmonicSeries %d]: The nth number in the Harmonic series is %.6f\n", pid, harmonicNums[number-1]);
 
     
-    return sum;
+    return (int)sum;
 }
 
 

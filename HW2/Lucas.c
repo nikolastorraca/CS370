@@ -23,21 +23,18 @@ int main(int argc, char** argv) {
         return 0;
     }
     int lucasNums[] = {2,1,3,4,7,11,18,29,47,76,123,199,322,521,843,1346,2207,3571,5778,9349};
-    printf("[Lucas %d] received argument: %d\n", pid, number);
 
     for(int i = 0; i <= number-1; i++){
         sum += lucasNums[i];
     }
 
-    printf("[Lucas %d]: The sum of the first %d number of the Lucas series is %d\n", pid, number, sum);
+    printf("[Lucas %d]: The sum of the first %d numbers of the Lucas series is %d\n", pid, number, sum);
     printf("[Lucas %d]: The nth number in the lucas series is %d\n", pid, lucasNums[number-1]);
     
     if(number > 7){
-        printf("The sum of %d lucas numbers is > 50 so return n.\n", number);
         return number;
     }
 
-    printf("The sum of %d lucas numbers is <= 50 so return the sum.\n", number);
     return sum;
 }
 
