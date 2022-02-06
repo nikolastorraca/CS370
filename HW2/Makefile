@@ -4,10 +4,7 @@ CFLAGS=-Wall
 #build: Generator Child
 #Lucas HexagonialSeries HarmonicSeries
 
-build: Generator Child Lucas HexagonalSeries HarmonicSeries
-
-Child: Child.c
-	$(CC) -o Child $(CFLAGS) Child.c
+build: Generator Lucas HexagonalSeries HarmonicSeries
 
 Lucas: Lucas.c
 	$(CC) -o Lucas $(CFLAGS) Lucas.c
@@ -22,7 +19,10 @@ Generator: Generator.o
 	$(CC) -o Generator $(CFLAGS) Generator.c
 
 clean:
-	rm -f *.o Generator Child Lucas HexagonalSeries HarmonicSeries
+	rm -f *.o Generator Lucas HexagonalSeries HarmonicSeries
 
 test:
 	./Generator
+
+package:
+	tar -czvf Nikolas-Torraca-HW2.tar .

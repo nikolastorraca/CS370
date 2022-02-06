@@ -22,9 +22,12 @@ int main(int argc, char** argv) {
         printf("[HarmonicSeries] ERROR: %d is not between 1 (inclusive) and 20 (inclusive).\n", number);
         return 0;
     }
+
+    // store harmonic number series in array
     float harmonicNums[] = {1,((float)1/(float)2),((float)1/(float)3),((float)1/(float)4),((float)1/(float)5),((float)1/(float)6),((float)1/(float)7),((float)1/(float)8),((float)1/(float)9),((float)1/(float)10),
         ((float)1/(float)11),((float)1/(float)12),((float)1/(float)13),((float)1/(float)14),((float)1/(float)15),((float)1/(float)16),((float)1/(float)17),((float)1/(float)18),((float)1/(float)19),((float)1/(float)20)};
 
+    //calculate sum
     for(int i = 0; i <= number-1; i++){
         sum += harmonicNums[i];
     }
@@ -33,7 +36,7 @@ int main(int argc, char** argv) {
     printf("[HarmonicSeries %d]: The nth number in the Harmonic series is %.6f\n", pid, harmonicNums[number-1]);
 
     
-    return (int)sum;
+    return (int)sum; //cast to int because WEXITSTATUS only returns 8 least-significant bits
 }
 
 
