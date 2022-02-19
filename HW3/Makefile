@@ -1,10 +1,7 @@
 CC = gcc
 CFLAGS=-Wall
 
-#build: Generator Child
-#Lucas HexagonialSeries HarmonicSeries
-
-build: Lucas HexagonalSeries HarmonicSeries
+build: Starter Reader Lucas HexagonalSeries HarmonicSeries
 
 Lucas: Lucas.c
 	$(CC) -o Lucas $(CFLAGS) Lucas.c
@@ -15,14 +12,17 @@ HexagonalSeries: HexagonalSeries.c
 HarmonicSeries: HarmonicSeries.c
 	$(CC) -o HarmonicSeries $(CFLAGS) HarmonicSeries.c
 
-#Generator: Generator.o
-#	$(CC) -o Generator $(CFLAGS) Generator.c
+Reader: Reader.c
+	$(CC) -o Reader $(CFLAGS) Reader.c
+
+Starter: Starter.c
+	$(CC) -o Starter $(CFLAGS) Starter.c 
 
 clean:
-	rm -f *.o Generator Lucas HexagonalSeries HarmonicSeries
+	rm -f *.o Starter Reader Lucas HexagonalSeries HarmonicSeries
 
 test:
-	./Generator
+	./Starter
 
 package:
 	tar -czvf Nikolas-Torraca-HW3.tar .
