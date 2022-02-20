@@ -50,7 +50,7 @@ int main(int argc, char** argv) {
     }
     else { // Parent Process
             
-        printf("[Starter %d]: Waiting for the child process %d\n", my_pid, pid);
+        //DEBUGprintf("[Starter %d]: Waiting for the child process %d\n", my_pid, pid);
         //int status;
         close(fd[WRITE_END]);
 
@@ -58,14 +58,12 @@ int main(int argc, char** argv) {
         //Read from pipe:
         read(fd[READ_END], read_str, SMALL_BUFF);
         sum = atoi(read_str);
-        printf("[Starter %d]: The sum is: %d\n",my_pid, sum);
+        printf("[Starter %d]: Contents read from the read end pipe: %d\n",my_pid, sum);
 
         close(fd[READ_END]);
     }
 
     int maxPrime = findMaxPrime(sum);
-
-    printf("[Starter %d]: The max prime number is: %d\n", my_pid, maxPrime);
 
     char primeAsString[SMALL_BUFF];
     sprintf(primeAsString, "%d", maxPrime);
@@ -85,6 +83,7 @@ int main(int argc, char** argv) {
 		printf("Map failed\n");
 		return -1;
 	}
+    printf("[Starter %d]: Created Shared memory 'SHM_Lucas' with FD: %d\n", my_pid, shmLucas_fd);
     int shmHarmonic_fd = shm_open(SHM_HarmonicSeries, O_CREAT | O_RDWR, 0666);
     ftruncate(shmHarmonic_fd, SIZE);
     harmonicPtr = mmap(0, SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, shmHarmonic_fd, 0);
@@ -92,6 +91,7 @@ int main(int argc, char** argv) {
 		printf("Map failed\n");
 		return -1;
 	}
+    printf("[Starter %d]: Created Shared memory 'SHM_Harmonic' with FD: %d\n", my_pid, shmHarmonic_fd);
     int shmHex_fd = shm_open(SHM_HexagonalSeies, O_CREAT | O_RDWR, 0666);
     ftruncate(shmHex_fd, SIZE);
     hexPtr = mmap(0, SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, shmHex_fd, 0);
@@ -99,29 +99,40 @@ int main(int argc, char** argv) {
 		printf("Map failed\n");
 		return -1;
 	}
+    printf("[Starter %d]: Created Shared memory 'SHM_Hexagonal' with FD: %d\n", my_pid, shmHex_fd);
 
-    pid_t pid1 = fork();
-    pid_t pid2 = fork();
-    if(pid1 < 0 || pid2 < 0) {
-        printf("Fork Failed\n");
-        exit(1);
-    }
-    else if(pid1 > 0 && pid2 > 0) { //Parent process
-
-        printf("[Starter %d]: Parent process %d\n", my_pid, getpid());
-    }
-    else if(pid1 == 0 && pid2 > 0) { // Child 1
+    pid_t pid1, pid2, pid3;
+    pid1 = fork();
+    if(pid1 == 0) { //Child 1
         printf("[Starter %d]: Child 1 process %d\n", my_pid, getpid());
+        execlp("./Lucas", "./Lucas", lucasPtr, primeAsString, NULL);
     }
-    else if(pid1 > 0 && pid2 == 0) { // Child 2
-        printf("[Starter %d]: Child 2 process %d\n", my_pid, getpid());
+    else {
+        pid2 = fork();
+        if(pid2 == 0) { // Child 2
+            printf("[Starter %d]: Child 2 process %d\n", my_pid, getpid());
+            execlp("./HarmonicSeries", "./HarmonicSeries", harmonicPtr, primeAsString, NULL);
+        }
+        else {
+            pid3 = fork();
+            if(pid3 == 0) { // Child 3
+                printf("[Starter %d]: Child 3 process %d\n", my_pid, getpid());
+                execlp("./HexagonalSeries", "./HexagonalSeries", hexPtr, primeAsString, NULL);
+            }
+            else { //Parent Process
+                printf("[Starter %d]: Parent process %d\n", my_pid, getpid());
+                int status;
+                pid1 = wait(&status);
+                pid2 = wait(&status);
+                pid3 = wait(&status);
+            }
+        }
     }
-    else { // Child 3
-        printf("[Starter %d]: Child 3 process %d\n", my_pid, getpid());
-    }
-    
 
 
+    printf("Back to Starter!\n");
+
+    printf("%s", (char *)lucasPtr);
 
     return 0;
 }

@@ -6,6 +6,8 @@
 
 #define LARGE_BUFF 1000
 #define SMALL_BUFF 100
+#define READ_END 0
+#define WRITE_END 1
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -22,9 +24,6 @@ int main(int argc, char** argv) {
         return 0;
     }
 
-    printf("Reader: Congrats! We made it to reader!\n");
-    printf("Reader: File is %s\n", argv[1]);
-
     int fileDescriptor = atoi(argv[2]);
 
     // open file
@@ -38,14 +37,13 @@ int main(int argc, char** argv) {
     }
 
     fclose(fp);
-   
-    printf("Reader: The sum is: %d\n", sum);
 
     char sumAsString[SMALL_BUFF];
     sprintf(sumAsString, "%d", sum);
 
-    //Write sum to pipe
+    //Write sum to pipe and close write end of pipe
     write(fileDescriptor, sumAsString, strlen(sumAsString)+1);
+    close(fileDescriptor);
 
     return 0;
 }
