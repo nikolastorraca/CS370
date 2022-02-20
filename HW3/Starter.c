@@ -9,6 +9,9 @@
 #include <sys/types.h>
 #include <sys/wait.h> // wait()
 #include <unistd.h> // fork(), pid_t
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 #define LARGE_BUFF 1000
 #define SMALL_BUFF 100
@@ -66,6 +69,58 @@ int main(int argc, char** argv) {
 
     char primeAsString[SMALL_BUFF];
     sprintf(primeAsString, "%d", maxPrime);
+
+    //create shared memory segments
+    char SHM_Lucas[SMALL_BUFF];
+    char SHM_HarmonicSeries[SMALL_BUFF];
+    char SHM_HexagonalSeies[SMALL_BUFF];
+    void *lucasPtr;
+    void *harmonicPtr;
+    void *hexPtr;
+    int SIZE = 4096;
+    int shmLucas_fd = shm_open(SHM_Lucas, O_CREAT | O_RDWR, 0666);
+    ftruncate(shmLucas_fd, SIZE);
+    lucasPtr = mmap(0, SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, shmLucas_fd, 0);
+    	if (lucasPtr == MAP_FAILED) {
+		printf("Map failed\n");
+		return -1;
+	}
+    int shmHarmonic_fd = shm_open(SHM_HarmonicSeries, O_CREAT | O_RDWR, 0666);
+    ftruncate(shmHarmonic_fd, SIZE);
+    harmonicPtr = mmap(0, SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, shmHarmonic_fd, 0);
+    	if (harmonicPtr == MAP_FAILED) {
+		printf("Map failed\n");
+		return -1;
+	}
+    int shmHex_fd = shm_open(SHM_HexagonalSeies, O_CREAT | O_RDWR, 0666);
+    ftruncate(shmHex_fd, SIZE);
+    hexPtr = mmap(0, SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, shmHex_fd, 0);
+    	if (hexPtr == MAP_FAILED) {
+		printf("Map failed\n");
+		return -1;
+	}
+
+    pid_t pid1 = fork();
+    pid_t pid2 = fork();
+    if(pid1 < 0 || pid2 < 0) {
+        printf("Fork Failed\n");
+        exit(1);
+    }
+    else if(pid1 > 0 && pid2 > 0) { //Parent process
+
+        printf("[Starter %d]: Parent process %d\n", my_pid, getpid());
+    }
+    else if(pid1 == 0 && pid2 > 0) { // Child 1
+        printf("[Starter %d]: Child 1 process %d\n", my_pid, getpid());
+    }
+    else if(pid1 > 0 && pid2 == 0) { // Child 2
+        printf("[Starter %d]: Child 2 process %d\n", my_pid, getpid());
+    }
+    else { // Child 3
+        printf("[Starter %d]: Child 3 process %d\n", my_pid, getpid());
+    }
+    
+
 
 
     return 0;

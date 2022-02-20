@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS=-Wall
+CFLAGS=-Wall -lrt
 
 build: Starter Reader Lucas HexagonalSeries HarmonicSeries
 
