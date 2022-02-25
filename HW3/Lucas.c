@@ -7,6 +7,11 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <fcntl.h>
+#include <sys/shm.h>
+#include <sys/stat.h>
+#include <sys/mman.h>
+#include <stdint.h>
 
 int main(int argc, char** argv) {
 
@@ -38,13 +43,33 @@ int main(int argc, char** argv) {
     printf("[Lucas %d]: The nth number in the lucas series is %d\n", pid, lucasNums[number-1]);
     printf("[Lucas %d]: The sum of the first %d numbers of the Lucas series is %d\n", pid, number, sum);
     
+    //printf("%s\n", argv[1]);
+
+    int SIZE = 4096;
+    char valAsString[100];
+    
+    void *lucasPtr;
+    int shmLucas_fd = shm_open(argv[1], O_RDWR, 0666);
+	if (shmLucas_fd == -1) {
+		printf("shared memory failed\n");
+		exit(-1);
+    }
+
+   	lucasPtr = mmap(0,SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, shmLucas_fd, 0);
+	if (lucasPtr == MAP_FAILED) {
+		printf("Map failed\n");
+		exit(-1);
+	}
+
     if(number > 7){ // if num > 7, the sum is > 50
-        sprintf(argv[1],"%d", number);
+        sprintf(valAsString, "%d", number);
+        sprintf(lucasPtr,"%s",valAsString);
         return 0;
     }
 
-    sprintf(argv[1], "%d", sum);
-
+    sprintf(valAsString, "%d", sum);
+    sprintf(lucasPtr,"%s",valAsString);
+  
     return 0;
 }
 

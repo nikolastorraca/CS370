@@ -69,9 +69,9 @@ int main(int argc, char** argv) {
     sprintf(primeAsString, "%d", maxPrime);
 
     //create shared memory segments
-    char SHM_Lucas[SMALL_BUFF];
-    char SHM_HarmonicSeries[SMALL_BUFF];
-    char SHM_HexagonalSeies[SMALL_BUFF];
+    char *SHM_Lucas = "SHM_Lucas";
+    char *SHM_HarmonicSeries = "SHM_HarmonicSeries";
+    char *SHM_HexagonalSeries = "SHM_HexagonalSeries";
     void *lucasPtr;
     void *harmonicPtr;
     void *hexPtr;
@@ -92,7 +92,7 @@ int main(int argc, char** argv) {
 		return -1;
 	}
     printf("[Starter %d]: Created Shared memory 'SHM_Harmonic' with FD: %d\n", my_pid, shmHarmonic_fd);
-    int shmHex_fd = shm_open(SHM_HexagonalSeies, O_CREAT | O_RDWR, 0666);
+    int shmHex_fd = shm_open(SHM_HexagonalSeries, O_CREAT | O_RDWR, 0666);
     ftruncate(shmHex_fd, SIZE);
     hexPtr = mmap(0, SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, shmHex_fd, 0);
     	if (hexPtr == MAP_FAILED) {
@@ -105,26 +105,24 @@ int main(int argc, char** argv) {
     pid1 = fork();
     if(pid1 == 0) { //Child 1
         printf("[Starter %d]: Child 1 process %d\n", my_pid, getpid());
-        execlp("./Lucas", "./Lucas", lucasPtr, primeAsString, NULL);
+        execlp("./Lucas", "./Lucas", SHM_Lucas, primeAsString, NULL);
     }
     else {
         pid2 = fork();
         if(pid2 == 0) { // Child 2
             printf("[Starter %d]: Child 2 process %d\n", my_pid, getpid());
-            execlp("./HarmonicSeries", "./HarmonicSeries", harmonicPtr, primeAsString, NULL);
+            execlp("./HarmonicSeries", "./HarmonicSeries", SHM_HarmonicSeries, primeAsString, NULL);
         }
         else {
             pid3 = fork();
             if(pid3 == 0) { // Child 3
                 printf("[Starter %d]: Child 3 process %d\n", my_pid, getpid());
-                execlp("./HexagonalSeries", "./HexagonalSeries", hexPtr, primeAsString, NULL);
+                execlp("./HexagonalSeries", "./HexagonalSeries", SHM_HexagonalSeries, primeAsString, NULL);
             }
             else { //Parent Process
-                printf("[Starter %d]: Parent process %d\n", my_pid, getpid());
-                int status;
-                pid1 = wait(&status);
-                pid2 = wait(&status);
-                pid3 = wait(&status);
+                printf("[Starter %d]: Parent Process %d\n", my_pid, getpid());
+               while(wait(NULL) > 0);
+
             }
         }
     }
@@ -132,8 +130,49 @@ int main(int argc, char** argv) {
 
     printf("Back to Starter!\n");
 
-    printf("%s", (char *)lucasPtr);
+    char *readLucasPtr;
+    int shm_fd = shm_open(SHM_Lucas, O_RDONLY, 0666);
+	if (shm_fd == -1) {
+		printf("shared memory failed\n");
+		exit(-1);
+	}
+    readLucasPtr = mmap(0,SIZE, PROT_READ, MAP_SHARED, shm_fd, 0);
+	if (readLucasPtr == MAP_FAILED) {
+		printf("Map failed\n");
+		exit(-1);
+	}
 
+    printf("[Starter %d]: Lucas last number: %s\n", my_pid, readLucasPtr);
+
+    char *readHarmonicPtr;
+    int shm_fd3 = shm_open(SHM_HarmonicSeries, O_RDONLY, 0666);
+	if (shm_fd3 == -1) {
+		printf("shared memory failed\n");
+		exit(-1);
+	}
+    readHarmonicPtr = mmap(0,SIZE, PROT_READ, MAP_SHARED, shm_fd3, 0);
+	if (readHarmonicPtr == MAP_FAILED) {
+		printf("Map failed\n");
+		exit(-1);
+	}
+
+    printf("[Starter %d]: HarmonicSeries last number: %s\n", my_pid, readHarmonicPtr);
+
+    char *readHexPtr;
+    int shm_fd2 = shm_open(SHM_HexagonalSeries, O_RDONLY, 0666);
+	if (shm_fd2 == -1) {
+		printf("shared memory failed\n");
+		exit(-1);
+	}
+    readHexPtr = mmap(0,SIZE, PROT_READ, MAP_SHARED, shm_fd2, 0);
+	if (readHexPtr == MAP_FAILED) {
+		printf("Map failed\n");
+		exit(-1);
+	}
+
+   printf("[Starter %d]: HexagonalSeries last number: %s\n", my_pid, readHexPtr);
+
+    
     return 0;
 }
 

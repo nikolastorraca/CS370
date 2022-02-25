@@ -7,6 +7,11 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <fcntl.h>
+#include <sys/shm.h>
+#include <sys/stat.h>
+#include <sys/mman.h>
+#include <stdint.h>
 
 int main(int argc, char** argv) {
 
@@ -37,11 +42,29 @@ int main(int argc, char** argv) {
     printf("\n");
 
     printf("[HarmonicSeries %d]: The nth number in the Harmonic series is %.6f\n", pid, harmonicNums[number-1]);
-    printf("[HarmonicSeries %d]: The first %d numbers of the Harmonic series are %.6f\n", pid, number, sum);
+    printf("[HarmonicSeries %d]: The sum of the first %d numbers of the Harmonic series are %.6f\n", pid, number, sum);
 
     
     int intSum = (int)sum; //cast to int because WEXITSTATUS only returns 8 least-significant bits
-    sprintf(argv[1],"%d", intSum);
+    
+    int SIZE = 4096;
+    char valAsString[100];
+
+    void *harmonicPtr;
+    int shmHarmonic_fd = shm_open(argv[1], O_RDWR, 0666);
+	if (shmHarmonic_fd == -1) {
+		printf("shared memory failed\n");
+		exit(-1);
+    }
+
+    harmonicPtr = mmap(0,SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, shmHarmonic_fd, 0);
+    if(harmonicPtr == MAP_FAILED) {
+		printf("Map failed\n");
+		exit(-1);
+    }
+
+    sprintf(valAsString, "%d", intSum);
+    sprintf(harmonicPtr,"%s", valAsString);
 
     return 0;
 }
