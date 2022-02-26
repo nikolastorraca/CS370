@@ -23,14 +23,13 @@ int main(int argc, char** argv) {
     pid_t pid = getpid();
     float sum = 0;
     int number = atoi(argv[2]);
-    /*if(number>20 || number<1){
-        printf("[HarmonicSeries] ERROR: %d is not between 1 (inclusive) and 20 (inclusive).\n", number);
-        return 0;
-    }*/
 
-    // store harmonic number series in array
-    float harmonicNums[] = {1,((float)1/(float)2),((float)1/(float)3),((float)1/(float)4),((float)1/(float)5),((float)1/(float)6),((float)1/(float)7),((float)1/(float)8),((float)1/(float)9),((float)1/(float)10),
-        ((float)1/(float)11),((float)1/(float)12),((float)1/(float)13),((float)1/(float)14),((float)1/(float)15),((float)1/(float)16),((float)1/(float)17),((float)1/(float)18),((float)1/(float)19),((float)1/(float)20)};
+    // store harmonic number series in array dynamically
+    float harmonicNums[number];
+
+    for(int i = 1; i <= number; i++) {
+        harmonicNums [i-1] = (float)1/(float)i;
+    }
 
     printf("[HarmonicSeries %d]: The first %d numbers of the Harmonic series are ", pid, number);
     //calculate sum
@@ -45,8 +44,9 @@ int main(int argc, char** argv) {
     printf("[HarmonicSeries %d]: The sum of the first %d numbers of the Harmonic series are %.6f\n", pid, number, sum);
 
     
-    int intSum = (int)sum; //cast to int because WEXITSTATUS only returns 8 least-significant bits
+    int intSum = (int)sum; //cast to int 
     
+    //create pointer to shared memory to write data
     int SIZE = 4096;
     char valAsString[100];
 
@@ -63,6 +63,7 @@ int main(int argc, char** argv) {
 		exit(-1);
     }
 
+    //write to shared memory
     sprintf(valAsString, "%d", intSum);
     sprintf(harmonicPtr,"%s", valAsString);
 

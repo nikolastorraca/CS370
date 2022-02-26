@@ -31,6 +31,7 @@ int main(int argc, char** argv) {
         return 0;
     }
 
+    //create pipe
     if(pipe(fd) == -1) {
         printf("Pipe Failed");
         exit(1);
@@ -50,11 +51,10 @@ int main(int argc, char** argv) {
     }
     else { // Parent Process
             
-        //DEBUGprintf("[Starter %d]: Waiting for the child process %d\n", my_pid, pid);
-        //int status;
         close(fd[WRITE_END]);
 
         char read_str[SMALL_BUFF];
+        
         //Read from pipe:
         read(fd[READ_END], read_str, SMALL_BUFF);
         sum = atoi(read_str);
@@ -101,35 +101,30 @@ int main(int argc, char** argv) {
 	}
     printf("[Starter %d]: Created Shared memory 'SHM_Hexagonal' with FD: %d\n", my_pid, shmHex_fd);
 
+    //Create 3 child processes
     pid_t pid1, pid2, pid3;
     pid1 = fork();
     if(pid1 == 0) { //Child 1
-        printf("[Starter %d]: Child 1 process %d\n", my_pid, getpid());
         execlp("./Lucas", "./Lucas", SHM_Lucas, primeAsString, NULL);
     }
     else {
         pid2 = fork();
         if(pid2 == 0) { // Child 2
-            printf("[Starter %d]: Child 2 process %d\n", my_pid, getpid());
             execlp("./HarmonicSeries", "./HarmonicSeries", SHM_HarmonicSeries, primeAsString, NULL);
         }
         else {
             pid3 = fork();
             if(pid3 == 0) { // Child 3
-                printf("[Starter %d]: Child 3 process %d\n", my_pid, getpid());
                 execlp("./HexagonalSeries", "./HexagonalSeries", SHM_HexagonalSeries, primeAsString, NULL);
             }
             else { //Parent Process
-                printf("[Starter %d]: Parent Process %d\n", my_pid, getpid());
+               //wait for all child processes to finish
                while(wait(NULL) > 0);
-
             }
         }
     }
 
-
-    printf("Back to Starter!\n");
-
+    //Read data writen to shared memory by child process for lucas sequence
     char *readLucasPtr;
     int shm_fd = shm_open(SHM_Lucas, O_RDONLY, 0666);
 	if (shm_fd == -1) {
@@ -144,6 +139,7 @@ int main(int argc, char** argv) {
 
     printf("[Starter %d]: Lucas last number: %s\n", my_pid, readLucasPtr);
 
+    //Read data writen to shared memory by child process for harmonic sequence
     char *readHarmonicPtr;
     int shm_fd3 = shm_open(SHM_HarmonicSeries, O_RDONLY, 0666);
 	if (shm_fd3 == -1) {
@@ -158,6 +154,7 @@ int main(int argc, char** argv) {
 
     printf("[Starter %d]: HarmonicSeries last number: %s\n", my_pid, readHarmonicPtr);
 
+    //Read data writen to shared memory by child process for hexagonal sequence
     char *readHexPtr;
     int shm_fd2 = shm_open(SHM_HexagonalSeries, O_RDONLY, 0666);
 	if (shm_fd2 == -1) {
@@ -170,14 +167,31 @@ int main(int argc, char** argv) {
 		exit(-1);
 	}
 
-   printf("[Starter %d]: HexagonalSeries last number: %s\n", my_pid, readHexPtr);
+    printf("[Starter %d]: HexagonalSeries last number: %s\n", my_pid, readHexPtr);
 
+    // unlink shared memory
+    if (shm_unlink(SHM_Lucas) == -1) {
+		printf("Error removing %s\n",SHM_Lucas);
+		exit(-1);
+	}
+    if (shm_unlink(SHM_HarmonicSeries) == -1) {
+		printf("Error removing %s\n",SHM_HarmonicSeries);
+		exit(-1);
+	}
+    if (shm_unlink(SHM_HexagonalSeries) == -1) {
+		printf("Error removing %s\n",SHM_HexagonalSeries);
+		exit(-1);
+	}
     
     return 0;
 }
 
+//This function will calculate max prime number less than or equal to sum 
+//Input: sum
+//Output: Max prime number
 int findMaxPrime(int sum) {
 
+    
     for(int i = sum; i >= 2; i--) {
 
         int flag = 0;

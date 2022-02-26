@@ -23,13 +23,15 @@ int main(int argc, char** argv) {
     pid_t pid = getpid();
     int sum = 0;
     int number = atoi(argv[2]);
-    /* if(number>20 || number<1){
-        printf("[Lucas] ERROR: %d is not between 1 (inclusive) and 20 (inclusive).\n", number);
-        return 0;
-    }*/
+  
+    //store lucas numbers sequence in array dynamically
+    int lucasNums[number];
+    lucasNums[0] = 2;
+    lucasNums[1] = 1;
 
-    //store lucas numbers sequence in array
-    int lucasNums[] = {2,1,3,4,7,11,18,29,47,76,123,199,322,521,843,1346,2207,3571,5778,9349};
+    for(int i = 3; i <= number; i++) {
+        lucasNums[i-1] = lucasNums[i-2] + lucasNums[i-3];
+    }
 
     printf("[Lucas %d]: The first %d numbers of the Lucas series are ", pid, number);
     //calculate first N number of series
@@ -43,11 +45,11 @@ int main(int argc, char** argv) {
     printf("[Lucas %d]: The nth number in the lucas series is %d\n", pid, lucasNums[number-1]);
     printf("[Lucas %d]: The sum of the first %d numbers of the Lucas series is %d\n", pid, number, sum);
     
-    //printf("%s\n", argv[1]);
 
     int SIZE = 4096;
     char valAsString[100];
     
+    //create pointer to shared memory to write data
     void *lucasPtr;
     int shmLucas_fd = shm_open(argv[1], O_RDWR, 0666);
 	if (shmLucas_fd == -1) {
@@ -61,12 +63,16 @@ int main(int argc, char** argv) {
 		exit(-1);
 	}
 
-    if(number > 7){ // if num > 7, the sum is > 50
-        sprintf(valAsString, "%d", number);
+    //write data to shared memory
+
+    //write n-th number if sum is greater than 50
+    if(sum>50){
+        sprintf(valAsString, "%d", lucasNums[number-1]);
         sprintf(lucasPtr,"%s",valAsString);
         return 0;
     }
 
+    //otherwise write sum
     sprintf(valAsString, "%d", sum);
     sprintf(lucasPtr,"%s",valAsString);
   
