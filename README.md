@@ -1,3 +1,3 @@
-This is the repository for CS370 - Algorithms.
+This is a repository for CS370 - Algorithms.
 
 Developer: Nik Torraca
