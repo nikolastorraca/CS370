@@ -1,7 +1,7 @@
 import java.util.Random;
 
 public class Generator extends java.lang.Thread {
-	//Necessary variables and object declaration
+
 	Random randomWithSeed;
 	Buffer buff;
 	int sumOfPrimes;
@@ -10,7 +10,7 @@ public class Generator extends java.lang.Thread {
 	int primeSeed;
 
 	public Generator(Buffer buff, int count, int id, int primeSeed) {
-		//Assign values to the variables
+
 		randomWithSeed = new Random(primeSeed);
 		this.buff = buff;
 		this.count = count;
@@ -20,28 +20,48 @@ public class Generator extends java.lang.Thread {
 
 	@Override
 	public void run()  {
-		/* 
-		Insert the N-th prime to the buffer as much as the count.
-        The random number N is produced by random generator. Check the range in the HW description.
-        You can generate a random number in range [1, 10] as:
-        int randomN = randomWithSeed.nextInt(10-1+1) + 1;
-		*/
-		while(buff.capacity() == buff.size()) {
-			wait();
-		}
-		int randomN = randomWithSeed.nextInt(31-3+1) + 3;
-		int randomPrime = findNthPrime(randomN);
-		for(int i = 0; i<count; i++){
-			buff.add(randomPrime);
-			notify();
-		}
 		
-			
-			
+		// Thread needs to add 'count' items to the buffer
+		for(int i = 0; i<count; i++){
 
+			try {
+				int randomN = randomWithSeed.nextInt(31-3+1) + 3;
+				int randomPrime = findNthPrime(randomN);
+				addToBuffer(randomPrime);
+			}
+			catch(InterruptedException ie) {
+				break;
+			}	
+		}
+	}
+
+	public synchronized void addToBuffer(int randomPrime) 
+	throws InterruptedException {
+		
+		while(buff.capacity() == buff.size()) {
+			this.wait();
+		}
+		buff.add(randomPrime);
+		System.out.println("[Generator " + id + "]: inserted " + randomPrime + " at index " + "TODO" + " at time " + Coordinator.getTime());
+		this.notify();
 	}
 
 	public int findNthPrime(int randomN) {
-		return 0;
+		
+		int nthPrime = 1;
+		int count = 0;
+		int i;
+		while(count < randomN) {
+			nthPrime += 1;
+			for(i = 2; i <= nthPrime; i++) {
+				if(nthPrime % i == 0) {
+					break;
+				}
+			}
+			if (i == nthPrime)
+				count++;
+		}
+		System.out.println("The " + randomN +"th prime nthPrimeber is: " + nthPrime);
+		return nthPrime;
 	}
 }
