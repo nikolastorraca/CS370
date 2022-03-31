@@ -7,7 +7,8 @@ import java.util.Arrays;
 import java.io.*;
 
 class Coordinator {
-	public static void main(String[] args) {
+	public static void main(String[] args) throws InterruptedException {
+
 
 		if(args.length != 2) {
 			System.out.println("Please run program again with 2 agruments.");
@@ -51,7 +52,16 @@ class Coordinator {
 		for(int i = 0; i < numConsumers; i++)
 			conThreads[i].start();
 
-		// TODO: When threads terminate, make final calculations
+		System.out.println("All threads have started");
+
+		for(int i = 0; i < numGenerators; i++)
+			genThreads[i].join();
+
+		for(int i = 0; i < numConsumers; i++)
+			conThreads[i].join();
+
+		System.out.println("Gen sum of primes: " + Generator.getSumOfConsumedPrimes());
+		System.out.println("Cons sum of primes: " + Consumer.getSumOfConsumedPrimes());
 
 	}
 

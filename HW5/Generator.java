@@ -4,10 +4,10 @@ public class Generator extends java.lang.Thread {
 
 	Random randomWithSeed;
 	Buffer buff;
-	int sumOfPrimes;
 	int count;
 	int id;
 	int primeSeed;
+	static int sumOfPrimes = 0;
 
 	public Generator(Buffer buff, int count, int id, int primeSeed) {
 
@@ -20,11 +20,11 @@ public class Generator extends java.lang.Thread {
 
 	@Override
 	public void run()  {
-		
 		// Thread needs to add 'count' items to the buffer
 		for(int i = 0; i<count; i++){
 
 			try {
+				System.out.println("In Generator Try block");
 				int randomN = randomWithSeed.nextInt(31-3+1) + 3;
 				int randomPrime = findNthPrime(randomN);
 				addToBuffer(randomPrime);
@@ -35,15 +35,22 @@ public class Generator extends java.lang.Thread {
 		}
 	}
 
-	public synchronized void addToBuffer(int randomPrime) 
+	private void addToBuffer(int randomPrime) 
 	throws InterruptedException {
 		
-		while(buff.capacity() == buff.size()) {
-			this.wait();
+		synchronized(buff) {
+			System.out.println("In addToBuffer method");
+			while(buff.capacity() == buff.size()) {
+				System.out.println("Buffer is full " + Thread.currentThread().getName() + " is waiting");
+				buff.wait();
+			}
+			//Thread.sleep(1000);
+			System.out.println("Made it past the waiting (Gen)");
+			buff.add(randomPrime);
+			sumOfPrimes += randomPrime;
+			System.out.println("[Generator " + id + "]: inserted " + randomPrime + " at index " + "TODO" + " at time " + Coordinator.getTime());
+			buff.notifyAll();
 		}
-		buff.add(randomPrime);
-		System.out.println("[Generator " + id + "]: inserted " + randomPrime + " at index " + "TODO" + " at time " + Coordinator.getTime());
-		this.notify();
 	}
 
 	public int findNthPrime(int randomN) {
@@ -61,7 +68,11 @@ public class Generator extends java.lang.Thread {
 			if (i == nthPrime)
 				count++;
 		}
-		System.out.println("The " + randomN +"th prime nthPrimeber is: " + nthPrime);
+		System.out.println("The " + randomN +"th prime num is: " + nthPrime);
 		return nthPrime;
+	}
+
+	public static int getSumOfConsumedPrimes() {
+		return sumOfPrimes;
 	}
 }

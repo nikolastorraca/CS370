@@ -22,7 +22,7 @@ public class Buffer {
         size++;
 
         if (size == capacity) {
-            System.out.println("Buffer Overflow");
+            System.out.println("Buffer Overflow!!!");
         }
 
         array[index] = element;
