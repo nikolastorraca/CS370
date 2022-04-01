@@ -21,7 +21,7 @@ public class Buffer {
         int index = (tail + 1) % capacity;
         size++;
 
-        if (size == capacity) {
+        if (size > capacity) {
             System.out.println("Buffer Overflow!!!");
         }
 
@@ -64,5 +64,13 @@ public class Buffer {
 
     public int size () {
         return size;
+    }
+
+    public int genIndex () {
+        return (tail + 1) % capacity;
+    }
+
+    public int conIndex() {
+        return head % capacity;
     }
 }

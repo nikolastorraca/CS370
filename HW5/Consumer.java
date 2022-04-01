@@ -5,7 +5,6 @@ public class Consumer extends java.lang.Thread {
 	static int sumOfPrimes = 0;
 	int count;
 	int id;
-	int primeSeed;
 
 	public Consumer(Buffer buff, int count, int id) {
 
@@ -16,10 +15,10 @@ public class Consumer extends java.lang.Thread {
 
 	@Override
 	public void run()  {
+
 		for(int i = 0; i<count; i++){
 			
 			try {
-				System.out.println("In Consumer try block");
 				consumeFromBuffer();
 			}
 			catch(InterruptedException ie) {
@@ -32,21 +31,22 @@ public class Consumer extends java.lang.Thread {
 	throws InterruptedException {
 		
 		synchronized(buff) {
-			System.out.println("In comsumeFromBuffer method");
+
+			// while buffer is empty, wait for a Generator to add an item to the buffer
 			while(buff.isEmpty()) {
-				System.out.println("Buff is empty. " + Thread.currentThread().getName() + " is waiting.");
 				buff.wait();
 			}
-			//Thread.sleep(1000);
-			System.out.println("Made it past waiting (consumer)");
+
+			// remove item from buffer, print data and notifyAll to notify Generator threads that an item has been consumed from the buffer
 			int randomPrime = (int)buff.get();
 			sumOfPrimes += randomPrime;
-			System.out.println("[Consumer " + id + "]: consumed " + randomPrime + " at index " + "TODO" + " at time " + Coordinator.getTime());
+			System.out.println("[Consumer " + id + "]: consumed " + randomPrime + " at index " + buff.conIndex() + " at time " + Coordinator.getTime());
 			buff.notifyAll();
 		}
 	}
 
 	public static int getSumOfConsumedPrimes() {
+		
 		return sumOfPrimes;
 	}
 }

@@ -12,6 +12,7 @@ class Coordinator {
 
 		if(args.length != 2) {
 			System.out.println("Please run program again with 2 agruments.");
+			System.exit(0);
 		}
 
 	    int seed = Integer.parseInt((args[0]));
@@ -24,20 +25,35 @@ class Coordinator {
 		int numGenerators = randomWithSeed.nextInt(5-2+1) + 2;
         Buffer myBuffer = new Buffer(buffSize);
 
-		int count = numItems/numGenerators;
-		int remainder = numItems%numGenerators;
-		int countLast;
-		if(remainder != 0)
-			countLast = count + remainder;
+		System.out.println("[Coordinator] Buffer Size: " + buffSize);
+		System.out.println("[Coordinator] Total Items: " + numItems);
+		System.out.println("[Coordinator] No. of Generators: " + numGenerators);
+		System.out.println("[Coordinator] No. of Consumers: " + numConsumers);
+
+		// calculate how much data each generator needs to produce
+		int genCount = numItems/numGenerators;
+		int genRemainder = numItems%numGenerators;
+		int genCountLast;
+		if(genRemainder != 0)
+			genCountLast = genCount + genRemainder;
 		else
-			countLast = count;
+			genCountLast = genCount;
+
+		// calculate how much data each consumer needs to consume
+		int conCount = numItems/numConsumers;
+		int conRemainder = numItems%numConsumers;
+		int conCountLast;
+		if(conRemainder != 0)
+			conCountLast = conCount + conRemainder;
+		else
+			conCountLast = conCount;
 
 	    // Create/Start Generator threads
         Generator[] genThreads = new Generator[numGenerators];
         for(int i = 0; i < numGenerators-1; i++) 
-            genThreads[i] = new Generator(myBuffer, count, (i+1), primeSeed);  
+            genThreads[i] = new Generator(myBuffer, genCount, (i+1), primeSeed);  
 		
-		genThreads[numGenerators-1] = new Generator(myBuffer, countLast, (numGenerators+1), primeSeed);
+		genThreads[numGenerators-1] = new Generator(myBuffer, genCountLast, (numGenerators+1), primeSeed);
 		
 		for(int i = 0; i < numGenerators; i++)
 			genThreads[i].start();
@@ -45,27 +61,27 @@ class Coordinator {
 		// Create/Start Generator threads
 		Consumer[] conThreads = new Consumer[numConsumers];
 		for(int i = 0; i < numConsumers-1; i++)
-			conThreads[i] = new Consumer(myBuffer, count, (i+1));
+			conThreads[i] = new Consumer(myBuffer, conCount, (i+1));
 		
-	    conThreads[numConsumers-1] = new Consumer(myBuffer, countLast, (numConsumers+1));
+	    conThreads[numConsumers-1] = new Consumer(myBuffer, conCountLast, (numConsumers+1));
 
 		for(int i = 0; i < numConsumers; i++)
 			conThreads[i].start();
 
-		System.out.println("All threads have started");
-
+		// Wait for threads to terminate...
 		for(int i = 0; i < numGenerators; i++)
 			genThreads[i].join();
 
 		for(int i = 0; i < numConsumers; i++)
 			conThreads[i].join();
 
-		System.out.println("Gen sum of primes: " + Generator.getSumOfConsumedPrimes());
-		System.out.println("Cons sum of primes: " + Consumer.getSumOfConsumedPrimes());
 
+		if(Generator.getSumOfConsumedPrimes() == Consumer.getSumOfConsumedPrimes())
+			System.out.println("The generated & consumed sums of primes are the same as shown: " + Generator.getSumOfConsumedPrimes());
+		else
+			System.out.println("Whoops! The generated & consumed sums are not the same...");
 	}
 
-	//Call this function from your generator or your consumer to get the time stamp to be displayed
 	public static String getTime() {
 		Clock offsetClock = Clock.offset(Clock.systemUTC(), Duration.ofHours(-9));
 		Instant time = Instant.now(offsetClock);

@@ -11,3 +11,6 @@ classes: $(CLASSES:.java=.class)
 
 clean:
 	rm -f *.class
+
+package:
+	tar -czvf Nikolas-Torraca-HW5.tar .
