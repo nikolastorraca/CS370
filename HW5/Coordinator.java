@@ -15,15 +15,15 @@ class Coordinator {
 			System.exit(0);
 		}
 
-	    int seed = Integer.parseInt((args[0]));
-	    int primeSeed = Integer.parseInt((args[1]));
+	        int seed = Integer.parseInt((args[0]));
+	    	int primeSeed = Integer.parseInt((args[1]));
 	
 		Random randomWithSeed = new Random(seed);
 		int buffSize = randomWithSeed.nextInt(10-5+1) + 5;
 		int numItems = randomWithSeed.nextInt(30-10+1) + 10;
 		int numConsumers = randomWithSeed.nextInt(5-2+1) + 2;
 		int numGenerators = randomWithSeed.nextInt(5-2+1) + 2;
-        Buffer myBuffer = new Buffer(buffSize);
+        	Buffer myBuffer = new Buffer(buffSize);
 
 		System.out.println("[Coordinator] Buffer Size: " + buffSize);
 		System.out.println("[Coordinator] Total Items: " + numItems);
@@ -48,10 +48,10 @@ class Coordinator {
 		else
 			conCountLast = conCount;
 
-	    // Create/Start Generator threads
-        Generator[] genThreads = new Generator[numGenerators];
-        for(int i = 0; i < numGenerators-1; i++) 
-            genThreads[i] = new Generator(myBuffer, genCount, (i+1), primeSeed);  
+	    	// Create/Start Generator threads
+        	Generator[] genThreads = new Generator[numGenerators];
+        	for(int i = 0; i < numGenerators-1; i++) 
+            	genThreads[i] = new Generator(myBuffer, genCount, (i+1), primeSeed);  
 		
 		genThreads[numGenerators-1] = new Generator(myBuffer, genCountLast, (numGenerators+1), primeSeed);
 		
@@ -63,7 +63,7 @@ class Coordinator {
 		for(int i = 0; i < numConsumers-1; i++)
 			conThreads[i] = new Consumer(myBuffer, conCount, (i+1));
 		
-	    conThreads[numConsumers-1] = new Consumer(myBuffer, conCountLast, (numConsumers+1));
+	    	conThreads[numConsumers-1] = new Consumer(myBuffer, conCountLast, (numConsumers+1));
 
 		for(int i = 0; i < numConsumers; i++)
 			conThreads[i].start();
